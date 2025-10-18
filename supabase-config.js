@@ -1,11 +1,16 @@
 // =========================================
 // SUPABASE MAIN DATABASE CONFIGURATION
-// Configuración directa sin dependencias
+// Compatible con Netlify Environment Variables
 // =========================================
 
-// Configuración de Supabase Main Database
-const SUPABASE_URL = 'https://unfftdyijijoyqoiinlb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuZmZ0ZHlpamlqb3lxb2lpbmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NjYxMDYsImV4cCI6MjA3NjA0MjEwNn0.xDcPDYNzZR8sRy_sKUzEBXLgDC4osA0r5x6a89Ax6qU';
+// Obtener configuración desde window.ENV_CONFIG (generado por config.js o Netlify)
+const SUPABASE_URL = window.ENV_CONFIG?.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = window.ENV_CONFIG?.SUPABASE_ANON_KEY || '';
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('[Supabase] Error: Variables de entorno no configuradas. Verifica tu configuración en Netlify o ejecuta: npm run config');
+  throw new Error('Supabase configuration missing');
+}
 
 // Inicializar cliente de Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

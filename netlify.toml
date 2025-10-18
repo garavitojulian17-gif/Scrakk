@@ -1,6 +1,7 @@
 # Netlify config for static site using home.html as root
 [build]
   publish = "."
+  command = "node netlify-inject-env.js"
 
 # Redirect root to home.html so / loads correctly
 [[redirects]]

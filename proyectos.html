@@ -264,8 +264,12 @@
   </main>
 
 
+  <!-- Configuración de variables de entorno -->
+  <script src="config.js"></script>
+  
   <!-- Configuración de Supabase -->
   <script src="supabase-config.js"></script>
+  <script src="supabase-images-config.js"></script>
   
   <script>
     // ========================================
@@ -354,7 +358,7 @@
         // Mostrar mensaje de carga
         grid.innerHTML = '<p style="color: rgba(255,255,255,0.6); text-align: center; grid-column: 1/-1; padding: 40px;">Cargando proyectos...</p>';
         
-        // Construir query según la vista actual
+        // Construir query según la vista actual (sin image_base64 que está en otra DB)
         let query = supabase
           .from('public_projects')
           .select(`
@@ -368,8 +372,7 @@
             likes_count,
             download_link,
             project_type,
-            created_at,
-            project_images(image_base64, is_thumbnail)
+            created_at
           `);
         
         // Filtrar según la vista
@@ -405,7 +408,7 @@
       }
     }
     
-    function renderProjects(projects) {
+    async function renderProjects(projects) {
       const grid = document.getElementById('projectsGrid');
       
       if (projects.length === 0) {
@@ -416,17 +419,30 @@
       
       document.getElementById('projectsEmpty').style.display = 'none';
       
-      grid.innerHTML = projects.map(project => {
-        // Obtener thumbnail (la primera imagen con is_thumbnail = true, o la primera imagen disponible)
+      // Cargar thumbnails desde la DB de imágenes
+      const projectsWithThumbnails = await Promise.all(projects.map(async project => {
         let thumbnailSrc = 'assets/icons/logo/logo.png'; // Por defecto
-        if (project.project_images && project.project_images.length > 0) {
-          const thumbnail = project.project_images.find(img => img.is_thumbnail);
-          if (thumbnail && thumbnail.image_base64) {
-            thumbnailSrc = thumbnail.image_base64;
-          } else if (project.project_images[0].image_base64) {
-            thumbnailSrc = project.project_images[0].image_base64;
+        
+        try {
+          // Obtener thumbnail desde la DB de imágenes separada
+          const { data: images, error } = await supabaseImages
+            .from('project_images')
+            .select('image_base64, is_thumbnail')
+            .eq('project_id', project.id)
+            .eq('is_thumbnail', true)
+            .limit(1);
+          
+          if (!error && images && images.length > 0) {
+            thumbnailSrc = images[0].image_base64;
           }
+        } catch (err) {
+          console.warn('Error cargando thumbnail para proyecto', project.id, err);
         }
+        
+        return { ...project, thumbnailSrc };
+      }));
+      
+      grid.innerHTML = projectsWithThumbnails.map(project => {
         
         // Normalizar tags
         const tags = project.tags || [];
@@ -446,7 +462,7 @@
                    data-title="${escapeHtml(project.title)}"
                    data-tags="${escapeHtml(tagsStr)}">
             <div class="project-thumb" style="background: ${randomGradient};">
-              <img src="${thumbnailSrc}" alt="${escapeHtml(project.title)}" />
+              <img src="${project.thumbnailSrc}" alt="${escapeHtml(project.title)}" />
             </div>
             <div class="project-body">
               <h3 class="project-title">${escapeHtml(project.title)}</h3>
