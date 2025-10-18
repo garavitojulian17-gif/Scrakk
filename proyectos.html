@@ -269,12 +269,7 @@
   </main>
 
 
-  <!-- Configuración de variables de entorno -->
-  <script src="config.js"></script>
-  
-  <!-- Configuración de Supabase -->
-  <script src="supabase-config.js"></script>
-  <script src="supabase-images-config.js"></script>
+  <!-- NO se necesita Supabase en el cliente - usamos Netlify Functions -->
   
   <script>
     // ========================================
@@ -363,41 +358,21 @@
         // Mostrar mensaje de carga
         grid.innerHTML = '<p style="color: rgba(255,255,255,0.6); text-align: center; grid-column: 1/-1; padding: 40px;">Cargando proyectos...</p>';
         
-        // Construir query según la vista actual (con info del usuario)
-        let query = supabase
-          .from('public_projects')
-          .select(`
-            id,
-            title,
-            description,
-            author_name,
-            user_id,
-            tags,
-            views_count,
-            downloads_count,
-            likes_count,
-            download_link,
-            project_type,
-            markdown_content,
-            created_at,
-            users (username, verified)
-          `);
+        // Llamar a Netlify Function
+        const response = await fetch('/.netlify/functions/get-projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            view: currentView,
+            userId: currentUser?.id
+          })
+        });
         
-        // Filtrar según la vista
-        if (currentView === 'my' && currentUser) {
-          query = query.eq('user_id', currentUser.id);
-        } else {
-          query = query.eq('is_public', true);
+        if (!response.ok) {
+          throw new Error('Error al cargar proyectos');
         }
         
-        const { data: projects, error } = await query.order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('Error al cargar proyectos:', error);
-          grid.innerHTML = '<p style="color: #f85149; text-align: center; grid-column: 1/-1; padding: 40px;">Error al cargar proyectos. Por favor, intenta de nuevo.</p>';
-          return;
-        }
-        
+        const { projects } = await response.json();
         allProjects = projects || [];
         
         if (allProjects.length === 0) {
@@ -427,44 +402,9 @@
       
       document.getElementById('projectsEmpty').style.display = 'none';
       
-      // Cargar thumbnails y avatares desde la DB de imágenes
-      const projectsWithThumbnails = await Promise.all(projects.map(async project => {
-        let thumbnailSrc = 'assets/icons/logo/logo.png';
-        let avatarSrc = 'assets/icons/logo.png';
-        
-        try {
-          // Obtener thumbnail del proyecto
-          const { data: images } = await supabaseImages
-            .from('project_images')
-            .select('image_base64, is_thumbnail')
-            .eq('project_id', project.id)
-            .eq('is_thumbnail', true)
-            .limit(1);
-          
-          if (images && images.length > 0) {
-            thumbnailSrc = images[0].image_base64;
-          }
-          
-          // Obtener avatar del usuario si existe user_id
-          if (project.user_id) {
-            const { data: avatar } = await supabaseImages
-              .from('user_avatars')
-              .select('avatar_base64')
-              .eq('user_id', project.user_id)
-              .limit(1);
-            
-            if (avatar && avatar.length > 0) {
-              avatarSrc = avatar[0].avatar_base64;
-            }
-          }
-        } catch (err) {
-          console.warn('Error cargando imágenes para proyecto', project.id, err);
-        }
-        
-        return { ...project, thumbnailSrc, avatarSrc };
-      }));
-      
-      grid.innerHTML = projectsWithThumbnails.map(project => {
+      grid.innerHTML = projects.map(project => {
+        const thumbnailSrc = project.thumbnail || 'assets/icons/logo/logo.png';
+        const avatarSrc = project.avatar || 'assets/icons/logo.png';
         
         // Normalizar tags
         const tags = project.tags || [];
@@ -484,11 +424,11 @@
                    data-title="${escapeHtml(project.title)}"
                    data-tags="${escapeHtml(tagsStr)}">
             <div class="project-thumb" style="background: ${randomGradient};">
-              <img src="${project.thumbnailSrc}" alt="${escapeHtml(project.title)}" />
+              <img src="${thumbnailSrc}" alt="${escapeHtml(project.title)}" />
             </div>
             <div class="project-body">
               <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                <img src="${project.avatarSrc}" alt="${escapeHtml(project.author_name)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1);" />
+                <img src="${avatarSrc}" alt="${escapeHtml(project.author_name)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1);" />
                 <div style="flex: 1; min-width: 0;">
                   <div style="display: flex; align-items: center; gap: 4px;">
                     <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(project.author_name)}</span>
@@ -545,12 +485,9 @@
       return div.innerHTML;
     }
     
-    async function openProjectDetail(projectId) {
+    function openProjectDetail(projectId) {
       const project = allProjects.find(p => p.id === projectId);
       if (!project) return;
-      
-      // Incrementar contador de vistas
-      await supabase.rpc('increment_project_views', { project_uuid: projectId });
       
       // Crear URL amigable: productos/nombre-proyecto-by-nombre-autor
       const projectSlug = project.title.toLowerCase()

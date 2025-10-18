@@ -9,8 +9,9 @@ package-lock.json
 # Variables de entorno (SENSIBLE - NO SUBIR)
 .env
 
-# Configuración generada (contiene API keys)
-config.js
+# Los archivos HTML se modifican durante build con variables inyectadas
+# NO commitear estos archivos si tienen variables reales
+*.html.backup
 
 # Logs
 *.log

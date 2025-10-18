@@ -251,12 +251,7 @@
     </div>
   </main>
 
-  <!-- Configuración de variables de entorno -->
-  <script src="config.js"></script>
-  
-  <!-- Configuración de Supabase -->
-  <script src="supabase-config.js"></script>
-  <script src="supabase-images-config.js"></script>
+  <!-- NO se necesita Supabase en el cliente - usamos Netlify Functions -->
 
   <script>
     // Obtener ID del proyecto desde URL
@@ -277,55 +272,17 @@
 
     async function loadProject() {
       try {
-        // Cargar datos del proyecto
-        const { data: project, error } = await supabase
-          .from('public_projects')
-          .select(`
-            id,
-            title,
-            description,
-            markdown_content,
-            author_name,
-            user_id,
-            tags,
-            views_count,
-            downloads_count,
-            likes_count,
-            download_link,
-            project_type,
-            created_at,
-            users (username, verified)
-          `)
-          .eq('id', projectId)
-          .single();
-
-        if (error || !project) {
+        // Llamar a Netlify Function
+        const response = await fetch(`/.netlify/functions/get-project?id=${projectId}`);
+        
+        if (!response.ok) {
           throw new Error('Proyecto no encontrado');
         }
-
-        // Cargar imágenes del proyecto
-        const { data: images } = await supabaseImages
-          .from('project_images')
-          .select('*')
-          .eq('project_id', projectId)
-          .order('image_order', { ascending: true });
-
-        // Cargar avatar del autor
-        let avatarSrc = 'assets/icons/logo.png';
-        if (project.user_id) {
-          const { data: avatar } = await supabaseImages
-            .from('user_avatars')
-            .select('avatar_base64')
-            .eq('user_id', project.user_id)
-            .limit(1);
-          
-          if (avatar && avatar.length > 0) {
-            avatarSrc = avatar[0].avatar_base64;
-          }
-        }
-
+        
+        const { project, images, avatar } = await response.json();
+        
         // Renderizar proyecto
-        renderProject(project, images || [], avatarSrc);
+        renderProject(project, images, avatar || 'assets/icons/logo.png');
 
       } catch (err) {
         console.error('Error cargando proyecto:', err);
@@ -458,7 +415,11 @@
 
     async function incrementDownloads(projectId) {
       try {
-        await supabase.rpc('increment_project_downloads', { project_uuid: projectId });
+        await fetch('/.netlify/functions/increment-downloads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId })
+        });
       } catch (err) {
         console.error('Error incrementando descargas:', err);
       }

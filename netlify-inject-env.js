@@ -1,7 +1,10 @@
 // =========================================
 // NETLIFY ENVIRONMENT VARIABLES INJECTOR
-// Este script inyecta las variables de entorno en tiempo de build
+// Inyecta variables directamente en HTML sin crear config.js
 // =========================================
+
+const fs = require('fs');
+const path = require('path');
 
 // Obtener variables de entorno de Netlify
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
@@ -10,28 +13,27 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 const SUPABASE_IMAGES_URL = process.env.SUPABASE_IMAGES_URL || '';
 const SUPABASE_IMAGES_ANON_KEY = process.env.SUPABASE_IMAGES_ANON_KEY || '';
 
-// Generar el contenido del archivo config.js
-const configContent = `// =========================================
-// CONFIGURACIÓN GENERADA AUTOMÁTICAMENTE
-// Generado desde variables de entorno de Netlify
-// =========================================
+// Script inline que se inyectará en el HTML
+const inlineScript = `<script>window.ENV_CONFIG={SUPABASE_URL:'${SUPABASE_URL}',SUPABASE_ANON_KEY:'${SUPABASE_ANON_KEY}',SUPABASE_SERVICE_KEY:'${SUPABASE_SERVICE_KEY}',SUPABASE_IMAGES_URL:'${SUPABASE_IMAGES_URL}',SUPABASE_IMAGES_ANON_KEY:'${SUPABASE_IMAGES_ANON_KEY}'}</script>`;
 
-window.ENV_CONFIG = {
-  SUPABASE_URL: '${SUPABASE_URL}',
-  SUPABASE_ANON_KEY: '${SUPABASE_ANON_KEY}',
-  SUPABASE_SERVICE_KEY: '${SUPABASE_SERVICE_KEY}',
-  SUPABASE_IMAGES_URL: '${SUPABASE_IMAGES_URL}',
-  SUPABASE_IMAGES_ANON_KEY: '${SUPABASE_IMAGES_ANON_KEY}'
-};
+// Archivos HTML a procesar
+const htmlFiles = ['proyectos.html', 'login.html', 'producto.html'];
 
-console.log('[Config] Configuración cargada desde variables de entorno');
-`;
+htmlFiles.forEach(file => {
+  const filePath = path.join(__dirname, file);
+  
+  if (fs.existsSync(filePath)) {
+    let content = fs.readFileSync(filePath, 'utf-8');
+    
+    // Reemplazar la línea que carga config.js con el script inline
+    content = content.replace(
+      /<script src="config\.js"><\/script>/g,
+      inlineScript
+    );
+    
+    fs.writeFileSync(filePath, content, 'utf-8');
+    console.log(`✅ Variables inyectadas en ${file}`);
+  }
+});
 
-// Escribir el archivo
-const fs = require('fs');
-const path = require('path');
-
-const configPath = path.join(__dirname, 'config.js');
-fs.writeFileSync(configPath, configContent, 'utf-8');
-
-console.log('✅ config.js generado desde variables de entorno de Netlify');
+console.log('✅ Variables de entorno inyectadas directamente en HTML');

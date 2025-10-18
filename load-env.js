@@ -34,30 +34,30 @@ function loadEnv() {
     }
   });
 
-  // Generar config.js
-  const configContent = `// =========================================
-// CONFIGURACIÓN GENERADA AUTOMÁTICAMENTE
-// Este archivo es generado desde .env - NO EDITAR MANUALMENTE
-// =========================================
+  // Script inline para inyectar en HTML (desarrollo local)
+  const inlineScript = `<script>window.ENV_CONFIG={SUPABASE_URL:'${envVars.SUPABASE_URL || ''}',SUPABASE_ANON_KEY:'${envVars.SUPABASE_ANON_KEY || ''}',SUPABASE_SERVICE_KEY:'${envVars.SUPABASE_SERVICE_KEY || ''}',SUPABASE_IMAGES_URL:'${envVars.SUPABASE_IMAGES_URL || ''}',SUPABASE_IMAGES_ANON_KEY:'${envVars.SUPABASE_IMAGES_ANON_KEY || ''}'}</script>`;
 
-// Configuración de entorno
-window.ENV_CONFIG = {
-  // Supabase Main Database
-  SUPABASE_URL: '${envVars.SUPABASE_URL || ''}',
-  SUPABASE_ANON_KEY: '${envVars.SUPABASE_ANON_KEY || ''}',
-  SUPABASE_SERVICE_KEY: '${envVars.SUPABASE_SERVICE_KEY || ''}',
-  
-  // Supabase Images Database
-  SUPABASE_IMAGES_URL: '${envVars.SUPABASE_IMAGES_URL || ''}',
-  SUPABASE_IMAGES_ANON_KEY: '${envVars.SUPABASE_IMAGES_ANON_KEY || ''}',
-};
+  // Archivos HTML a procesar
+  const htmlFiles = ['proyectos.html', 'login.html', 'producto.html'];
 
-console.log('[Config] Configuración cargada desde .env');
-`;
+  htmlFiles.forEach(file => {
+    const filePath = path.join(__dirname, file);
+    
+    if (fs.existsSync(filePath)) {
+      let content = fs.readFileSync(filePath, 'utf-8');
+      
+      // Reemplazar la línea que carga config.js con el script inline
+      content = content.replace(
+        /<script src="config\.js"><\/script>/g,
+        inlineScript
+      );
+      
+      fs.writeFileSync(filePath, content, 'utf-8');
+      console.log(`✅ Variables inyectadas en ${file}`);
+    }
+  });
 
-  const configPath = path.join(__dirname, 'config.js');
-  fs.writeFileSync(configPath, configContent, 'utf-8');
-  console.log('✅ Archivo config.js generado exitosamente');
+  console.log('✅ Variables de entorno inyectadas directamente en HTML');
 }
 
 // Ejecutar

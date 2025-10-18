@@ -220,11 +220,7 @@
     </div>
   </main>
 
-  <!-- Configuración de variables de entorno -->
-  <script src="config.js"></script>
-  
-  <!-- Configuración de Supabase -->
-  <script src="supabase-config.js"></script>
+  <!-- NO se necesita Supabase en el cliente - usamos Netlify Functions -->
 
   <script>
 
@@ -250,22 +246,23 @@
       }
 
       try {
-        // Buscar usuario en Supabase
-        const { data: user, error } = await supabase
-          .from('users')
-          .select('id, username, scrakk_id, display_name, avatar_url')
-          .eq('scrakk_id', scrakkId)
-          .eq('username', username)
-          .single();
+        // Llamar a Netlify Function
+        const response = await fetch('/.netlify/functions/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scrakkId, username })
+        });
 
-        if (error || !user) {
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
           loginError.textContent = 'Credenciales incorrectas. Verifica tu Scrakk ID y nombre de usuario.';
           loginError.classList.add('active');
           return;
         }
 
         // Guardar sesión
-        localStorage.setItem('scrakk_user', JSON.stringify(user));
+        localStorage.setItem('scrakk_user', JSON.stringify(data.user));
 
         // Redirigir a proyectos
         window.location.href = 'proyectos.html';
