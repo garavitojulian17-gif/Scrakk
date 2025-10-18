@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Iniciar Sesión • Scrakk</title>
-  <link rel="icon" type="image/png" href="assets/icons/logo/logo.png" />
+  <link rel="icon" type="image/png" href="assets/icons/logo.png">
   <link rel="stylesheet" href="styles.css" />
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -223,7 +223,11 @@
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Config local (solo desarrollo) -->
-  <script src="config-local.js"></script>
+  <script>
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      document.write('<script src="config-local.js"><\/script>');
+    }
+  </script>
   <!-- API Client unificado -->
   <script src="api-client.js"></script>
 

@@ -3,7 +3,7 @@
 // =========================================
 
 let currentUser = null;
-const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+// isDev ya está definido globalmente en api-client.js
 
 // Cargar usuario
 function loadCurrentUser() {
@@ -49,7 +49,7 @@ async function loadProfile() {
     // Obtener avatar
     let avatarSrc = 'assets/icons/logo.png';
     
-    if (isDev) {
+    if (window.isDev) {
       const supabaseImages = window.supabase.createClient(
         window.ENV_CONFIG.SUPABASE_IMAGES_URL,
         window.ENV_CONFIG.SUPABASE_IMAGES_ANON_KEY
@@ -127,7 +127,7 @@ async function loadMyProjects() {
 // Cargar mis extensiones
 async function loadMyExtensions() {
   try {
-    if (!isDev) {
+    if (!window.isDev) {
       document.getElementById('myExtensions').innerHTML = '<p style="color: rgba(255,255,255,0.6);">Extensiones no disponibles en esta versión.</p>';
       return;
     }
@@ -308,7 +308,7 @@ async function uploadAvatar(event) {
     const base64 = e.target.result;
     
     try {
-      if (!isDev) {
+      if (!window.isDev) {
         alert('Función no disponible en producción aún');
         return;
       }
@@ -345,7 +345,7 @@ async function updateUsername(event) {
   }
   
   try {
-    if (!isDev) {
+    if (!window.isDev) {
       alert('Función no disponible en producción aún');
       return;
     }

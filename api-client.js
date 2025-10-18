@@ -3,7 +3,8 @@
 // =========================================
 
 // Detectar si estamos en desarrollo local o producción
-const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+window.isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isDev = window.isDev;
 
 // En desarrollo, usar Supabase directamente (solo para testing)
 let supabase, supabaseImages;
