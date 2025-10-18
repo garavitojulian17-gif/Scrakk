@@ -269,7 +269,12 @@
   </main>
 
 
-  <!-- NO se necesita Supabase en el cliente - usamos Netlify Functions -->
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Config local (solo desarrollo) -->
+  <script src="config-local.js"></script>
+  <!-- API Client unificado -->
+  <script src="api-client.js"></script>
   
   <script>
     // ========================================
@@ -358,22 +363,8 @@
         // Mostrar mensaje de carga
         grid.innerHTML = '<p style="color: rgba(255,255,255,0.6); text-align: center; grid-column: 1/-1; padding: 40px;">Cargando proyectos...</p>';
         
-        // Llamar a Netlify Function
-        const response = await fetch('/.netlify/functions/get-projects', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            view: currentView,
-            userId: currentUser?.id
-          })
-        });
-        
-        if (!response.ok) {
-          throw new Error('Error al cargar proyectos');
-        }
-        
-        const { projects } = await response.json();
-        allProjects = projects || [];
+        // Usar API client unificado
+        allProjects = await window.API.getProjects(currentView, currentUser?.id);
         
         if (allProjects.length === 0) {
           grid.innerHTML = '';
@@ -432,7 +423,7 @@
                 <div style="flex: 1; min-width: 0;">
                   <div style="display: flex; align-items: center; gap: 4px;">
                     <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(project.author_name)}</span>
-                    ${project.users && project.users.verified ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="#8b00ff" stroke="#fff" stroke-width="2" style="flex-shrink: 0;"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : ''}
+                    ${project.verified ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="#1DA1F2" stroke="#fff" stroke-width="2" style="flex-shrink: 0;"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : ''}
                   </div>
                 </div>
               </div>

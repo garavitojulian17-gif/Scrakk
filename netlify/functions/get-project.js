@@ -52,8 +52,10 @@ exports.handler = async (event, context) => {
       .eq('project_id', id)
       .order('image_order', { ascending: true });
 
-    // Obtener avatar del autor
+    // Obtener avatar del autor Y verificación
     let avatar = null;
+    let verified = false;
+    
     if (project.user_id) {
       const { data: avatarData } = await supabaseImages
         .from('user_avatars')
@@ -63,6 +65,17 @@ exports.handler = async (event, context) => {
 
       if (avatarData && avatarData.length > 0) {
         avatar = avatarData[0].avatar_base64;
+      }
+      
+      // Obtener verificación
+      const { data: userData } = await supabase
+        .from('users')
+        .select('verified')
+        .eq('id', project.user_id)
+        .single();
+      
+      if (userData) {
+        verified = userData.verified || false;
       }
     }
 
@@ -75,7 +88,7 @@ exports.handler = async (event, context) => {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify({ project, images: images || [], avatar })
+      body: JSON.stringify({ project: { ...project, verified }, images: images || [], avatar })
     };
   } catch (error) {
     return {

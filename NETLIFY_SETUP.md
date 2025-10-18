@@ -26,6 +26,7 @@ Cliente (navegador)  →  Netlify Functions (servidor)  →  Supabase
 - `/.netlify/functions/get-project` - Detalle de proyecto
 - `/.netlify/functions/login` - Autenticación
 - `/.netlify/functions/increment-downloads` - Incrementar descargas
+- `/.netlify/functions/get-user-stats` - Estadísticas del usuario
 
 Las API keys solo existen en las **Netlify Functions** (server-side), nunca en el cliente.
 

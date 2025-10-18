@@ -251,7 +251,12 @@
     </div>
   </main>
 
-  <!-- NO se necesita Supabase en el cliente - usamos Netlify Functions -->
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Config local (solo desarrollo) -->
+  <script src="config-local.js"></script>
+  <!-- API Client unificado -->
+  <script src="api-client.js"></script>
 
   <script>
     // Obtener ID del proyecto desde URL
@@ -272,14 +277,8 @@
 
     async function loadProject() {
       try {
-        // Llamar a Netlify Function
-        const response = await fetch(`/.netlify/functions/get-project?id=${projectId}`);
-        
-        if (!response.ok) {
-          throw new Error('Proyecto no encontrado');
-        }
-        
-        const { project, images, avatar } = await response.json();
+        // Usar API client unificado
+        const { project, images, avatar } = await window.API.getProject(projectId);
         
         // Renderizar proyecto
         renderProject(project, images, avatar || 'assets/icons/logo.png');
@@ -309,7 +308,7 @@
             <div class="product-author-info">
               <div class="product-author-name">
                 ${escapeHtml(project.author_name)}
-                ${project.users && project.users.verified ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#8b00ff" stroke="#fff" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : ''}
+                ${project.verified ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#1DA1F2" stroke="#fff" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : ''}
               </div>
               <div class="product-author-meta">
                 Publicado el ${new Date(project.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -415,11 +414,7 @@
 
     async function incrementDownloads(projectId) {
       try {
-        await fetch('/.netlify/functions/increment-downloads', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ projectId })
-        });
+        await window.API.incrementDownloads(projectId);
       } catch (err) {
         console.error('Error incrementando descargas:', err);
       }

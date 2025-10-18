@@ -50,6 +50,7 @@ exports.handler = async (event, context) => {
     const projectsWithImages = await Promise.all(projects.map(async (project) => {
       let thumbnail = null;
       let avatar = null;
+      let verified = false;
 
       // Obtener thumbnail
       const { data: thumbs } = await supabaseImages
@@ -63,7 +64,7 @@ exports.handler = async (event, context) => {
         thumbnail = thumbs[0].image_base64;
       }
 
-      // Obtener avatar del autor
+      // Obtener avatar del autor Y verificación
       if (project.user_id) {
         const { data: avatarData } = await supabaseImages
           .from('user_avatars')
@@ -74,9 +75,20 @@ exports.handler = async (event, context) => {
         if (avatarData && avatarData.length > 0) {
           avatar = avatarData[0].avatar_base64;
         }
+        
+        // Obtener verificación
+        const { data: userData } = await supabase
+          .from('users')
+          .select('verified')
+          .eq('id', project.user_id)
+          .single();
+        
+        if (userData) {
+          verified = userData.verified || false;
+        }
       }
 
-      return { ...project, thumbnail, avatar };
+      return { ...project, thumbnail, avatar, verified };
     }));
 
     return {

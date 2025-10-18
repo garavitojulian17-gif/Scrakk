@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Dashboard • Scrakk</title>
+  <link rel="icon" type="image/png" href="assets/icons/logo/logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Chart.js para gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <!-- Config local -->
+  <script src="config-local.js"></script>
+  <!-- API Client -->
+  <script src="api-client.js"></script>
+  <style>
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 80px;
+    }
+    .dashboard-sidebar {
+      width: 280px;
+      background: rgba(0,0,0,0.3);
+      border-right: 1px solid rgba(255,255,255,0.1);
+      padding: 24px;
+      position: fixed;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+    }
+    .dashboard-main {
+      flex: 1;
+      margin-left: 280px;
+      padding: 32px;
+      max-width: 1400px;
+    }
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sidebar-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-item:hover {
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+    }
+    .sidebar-item.active {
+      background: rgba(139,0,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(139,0,255,0.3);
+    }
+    .dashboard-section {
+      display: none;
+    }
+    .dashboard-section.active {
+      display: block;
+    }
+    .profile-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 32px;
+      padding: 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(139,0,255,0.3);
+    }
+    .profile-info h2 {
+      font-size: 32px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .profile-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      background: rgba(139,0,255,0.2);
+      border: 1px solid rgba(139,0,255,0.3);
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #a855f7;
+    }
+    .profile-meta {
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,0.85);
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+    }
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #8b00ff, #6d00d9);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(139,0,255,0.4);
+    }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .project-card-dash {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .project-card-dash:hover {
+      border-color: rgba(139,0,255,0.5);
+      transform: translateY(-4px);
+    }
+    .project-thumbnail {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background: rgba(139,0,255,0.1);
+    }
+    .project-details {
+      padding: 16px;
+    }
+    .project-details h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .project-details p {
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .project-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+    .chart-container {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .chart-container h3 {
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    canvas {
+      max-height: 300px;
+    }
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card h4 {
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #8b00ff;
+    }
+    .upload-area {
+      border: 2px dashed rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-area:hover {
+      border-color: rgba(139,0,255,0.5);
+      background: rgba(139,0,255,0.05);
+    }
+    .upload-area input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-container">
+      <div class="logo">
+        <a href="home.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
+          <img src="assets/icons/logo.png" alt="Scrakk Logo">
+          <div class="typing-container">
+            <span class="typing-text"></span>
+            <span class="cursor"></span>
+          </div>
+        </a>
+      </div>
+      <div class="nav-links" id="navLinks">
+        <a href="home.html#descargar">Descargar</a>
+        <a href="home.html#docs">Docs</a>
+        <a href="home.html#desarrollo">Desarrollo</a>
+        <a href="proyectos.html">Proyectos Publicos</a>
+        <a href="home.html#compras">Compras</a>
+        <a href="dashboard.html" class="nav-button"><span>Mi Dashboard</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Navbar JavaScript -->
+  <script src="navbar.js"></script>
+
+  <div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-menu">
+        <div class="sidebar-item active" data-section="profile">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Mi Perfil
+        </div>
+        <div class="sidebar-item" data-section="projects">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          Mis Proyectos
+        </div>
+        <div class="sidebar-item" data-section="extensions">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          Mis Extensiones
+        </div>
+        <div class="sidebar-item" data-section="stats">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="20" x2="12" y2="10"></line>
+            <line x1="18" y1="20" x2="18" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="16"></line>
+          </svg>
+          Estadísticas
+        </div>
+        <div class="sidebar-item" data-section="settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6m-9-9h6m6 0h6"></path>
+          </svg>
+          Configuración
+        </div>
+        <div class="sidebar-item" onclick="logout()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Cerrar Sesión
+        </div>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <!-- Sección: Mi Perfil -->
+      <section id="section-profile" class="dashboard-section active">
+        <h1 style="margin-bottom: 24px;">Mi Perfil</h1>
+        <div class="profile-header" id="profileHeader">
+          <!-- Se cargará dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Sección: Mis Proyectos -->
+      <section id="section-projects" class="dashboard-section">
+        <h1 style="margin-bottom: 24px;">Mis Proyectos Públicos</h1>
+        <div class="projects-grid" id="myProjects">
+          <!-- Se cargará dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Sección: Mis Extensiones -->
+      <section id="section-extensions" class="dashboard-section">
+        <h1 style="margin-bottom: 24px;">Mis Extensiones</h1>
+        <div class="projects-grid" id="myExtensions">
+          <!-- Se cargará dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Sección: Estadísticas -->
+      <section id="section-stats" class="dashboard-section">
+        <h1 style="margin-bottom: 24px;">Estadísticas</h1>
+        
+        <div class="stats-summary" id="statsSummary">
+          <!-- Se cargará dinámicamente -->
+        </div>
+
+        <div class="chart-container">
+          <h3>Descargas de Proyectos por Fecha</h3>
+          <canvas id="downloadsChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <h3>Likes de Proyectos por Fecha</h3>
+          <canvas id="likesChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Sección: Configuración -->
+      <section id="section-settings" class="dashboard-section">
+        <h1 style="margin-bottom: 24px;">Configuración de Perfil</h1>
+        
+        <div style="max-width: 600px;">
+          <h3 style="margin-bottom: 20px;">Cambiar Foto de Perfil</h3>
+          <div class="upload-area" onclick="document.getElementById('avatarUpload').click()">
+            <input type="file" id="avatarUpload" accept="image/*" onchange="uploadAvatar(event)" />
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 16px; color: rgba(255,255,255,0.3);">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p style="color: rgba(255,255,255,0.6);">Click para subir una nueva foto</p>
+          </div>
+
+          <h3 style="margin: 40px 0 20px;">Cambiar Nombre de Usuario</h3>
+          <form onsubmit="updateUsername(event)">
+            <div class="form-group">
+              <label>Nuevo Nombre</label>
+              <input type="text" id="newDisplayName" placeholder="Tu nuevo nombre" />
+            </div>
+            <button type="submit" class="btn">Actualizar Nombre</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="dashboard-logic.js"></script>
+</body>
+</html>
