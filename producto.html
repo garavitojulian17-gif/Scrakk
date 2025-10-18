@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proyecto • Scrakk</title>
+  <link rel="icon" type="image/png" href="assets/icons/logo/logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Marked.js para renderizar Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    .product-page {
+      max-width: 1200px;
+      margin: 100px auto 80px;
+      padding: 0 24px;
+    }
+    .product-header {
+      margin-bottom: 32px;
+    }
+    .product-header h1 {
+      font-size: 42px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .product-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .product-author img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    .product-author-info {
+      flex: 1;
+    }
+    .product-author-name {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .product-author-meta {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+    .product-stats {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 32px;
+      padding: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+    }
+    .product-stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.7);
+    }
+    .product-images {
+      margin-bottom: 32px;
+    }
+    .product-image-main {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.05);
+      margin-bottom: 16px;
+    }
+    .product-image-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-image-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+    }
+    .product-image-thumb {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.05);
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .product-image-thumb:hover {
+      border-color: rgba(139,0,255,0.5);
+    }
+    .product-image-thumb.active {
+      border-color: #8b00ff;
+    }
+    .product-image-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-content {
+      margin-bottom: 32px;
+    }
+    .product-description {
+      font-size: 16px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .product-markdown {
+      color: rgba(255,255,255,0.85);
+      line-height: 1.7;
+    }
+    .product-markdown h1,
+    .product-markdown h2,
+    .product-markdown h3 {
+      color: #fff;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    .product-markdown p {
+      margin-bottom: 16px;
+    }
+    .product-markdown code {
+      background: rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .product-markdown pre {
+      background: rgba(255,255,255,0.05);
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .product-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .product-tag {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: rgba(139,0,255,0.15);
+      color: #a855f7;
+      border: 1px solid rgba(139,0,255,0.25);
+    }
+    .product-actions {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .product-button {
+      flex: 1;
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .product-button-primary {
+      background: linear-gradient(135deg, #8b00ff, #6d00d9);
+      color: #fff;
+    }
+    .product-button-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(139,0,255,0.4);
+    }
+    .product-button-secondary {
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .product-button-secondary:hover {
+      background: rgba(255,255,255,0.08);
+    }
+    .product-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      gap: 16px;
+    }
+    .product-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(139,0,255,0.2);
+      border-top-color: #8b00ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-container">
+      <div class="logo">
+        <a href="home.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
+          <img src="assets/icons/logo.png" alt="Scrakk Logo">
+          <div class="typing-container">
+            <span class="typing-text"></span>
+            <span class="cursor"></span>
+          </div>
+        </a>
+      </div>
+      <div class="nav-links" id="navLinks">
+        <a href="home.html#descargar">Descargar</a>
+        <a href="home.html#docs">Docs</a>
+        <a href="home.html#desarrollo">Desarrollo</a>
+        <a href="proyectos.html">Proyectos Publicos</a>
+        <a href="home.html#compras">Compras</a>
+        <a href="login.html" class="nav-button"><span>Iniciar Sesión</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Navbar JavaScript -->
+  <script src="navbar.js"></script>
+
+  <main class="product-page">
+    <div id="productContent" class="product-loading">
+      <div class="product-spinner"></div>
+      <p style="color: rgba(255,255,255,0.6);">Cargando proyecto...</p>
+    </div>
+  </main>
+
+  <!-- Configuración de variables de entorno -->
+  <script src="config.js"></script>
+  
+  <!-- Configuración de Supabase -->
+  <script src="supabase-config.js"></script>
+  <script src="supabase-images-config.js"></script>
+
+  <script>
+    // Obtener ID del proyecto desde URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+
+    if (!projectId) {
+      document.getElementById('productContent').innerHTML = `
+        <div style="text-align: center; color: #f85149;">
+          <h2>Proyecto no encontrado</h2>
+          <p>No se especificó un ID de proyecto válido.</p>
+          <a href="proyectos.html" style="color: #8b00ff; text-decoration: none;">← Volver a proyectos</a>
+        </div>
+      `;
+    } else {
+      loadProject();
+    }
+
+    async function loadProject() {
+      try {
+        // Cargar datos del proyecto
+        const { data: project, error } = await supabase
+          .from('public_projects')
+          .select(`
+            id,
+            title,
+            description,
+            markdown_content,
+            author_name,
+            user_id,
+            tags,
+            views_count,
+            downloads_count,
+            likes_count,
+            download_link,
+            project_type,
+            created_at,
+            users (username, verified)
+          `)
+          .eq('id', projectId)
+          .single();
+
+        if (error || !project) {
+          throw new Error('Proyecto no encontrado');
+        }
+
+        // Cargar imágenes del proyecto
+        const { data: images } = await supabaseImages
+          .from('project_images')
+          .select('*')
+          .eq('project_id', projectId)
+          .order('image_order', { ascending: true });
+
+        // Cargar avatar del autor
+        let avatarSrc = 'assets/icons/logo.png';
+        if (project.user_id) {
+          const { data: avatar } = await supabaseImages
+            .from('user_avatars')
+            .select('avatar_base64')
+            .eq('user_id', project.user_id)
+            .limit(1);
+          
+          if (avatar && avatar.length > 0) {
+            avatarSrc = avatar[0].avatar_base64;
+          }
+        }
+
+        // Renderizar proyecto
+        renderProject(project, images || [], avatarSrc);
+
+      } catch (err) {
+        console.error('Error cargando proyecto:', err);
+        document.getElementById('productContent').innerHTML = `
+          <div style="text-align: center; color: #f85149;">
+            <h2>Error al cargar el proyecto</h2>
+            <p>${err.message}</p>
+            <a href="proyectos.html" style="color: #8b00ff; text-decoration: none;">← Volver a proyectos</a>
+          </div>
+        `;
+      }
+    }
+
+    function renderProject(project, images, avatarSrc) {
+      const mainImage = images.find(img => img.is_thumbnail) || images[0];
+      const galleryImages = images.filter(img => img.id !== mainImage?.id);
+
+      const content = `
+        <div class="product-header">
+          <h1>${escapeHtml(project.title)}</h1>
+          
+          <div class="product-author">
+            <img src="${avatarSrc}" alt="${escapeHtml(project.author_name)}" />
+            <div class="product-author-info">
+              <div class="product-author-name">
+                ${escapeHtml(project.author_name)}
+                ${project.users && project.users.verified ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#8b00ff" stroke="#fff" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : ''}
+              </div>
+              <div class="product-author-meta">
+                Publicado el ${new Date(project.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </div>
+            </div>
+          </div>
+
+          <div class="product-stats">
+            <div class="product-stat">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <span>${project.views_count || 0} vistas</span>
+            </div>
+            <div class="product-stat">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>${project.downloads_count || 0} descargas</span>
+            </div>
+            <div class="product-stat">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <span>${project.likes_count || 0} likes</span>
+            </div>
+          </div>
+        </div>
+
+        ${images.length > 0 ? `
+          <div class="product-images">
+            <div class="product-image-main" id="mainImage">
+              <img src="${mainImage ? mainImage.image_base64 : 'assets/icons/logo/logo.png'}" alt="${escapeHtml(project.title)}" />
+            </div>
+            ${images.length > 1 ? `
+              <div class="product-image-gallery">
+                ${images.map((img, idx) => `
+                  <div class="product-image-thumb ${idx === 0 ? 'active' : ''}" data-image="${escapeHtml(img.image_base64)}">
+                    <img src="${img.image_base64}" alt="Image ${idx + 1}" />
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+
+        <div class="product-content">
+          ${project.description ? `
+            <div class="product-description">
+              ${escapeHtml(project.description)}
+            </div>
+          ` : ''}
+
+          ${project.markdown_content ? `
+            <div class="product-markdown">
+              ${marked.parse(project.markdown_content)}
+            </div>
+          ` : ''}
+        </div>
+
+        ${project.tags && project.tags.length > 0 ? `
+          <div class="product-tags">
+            ${project.tags.map(tag => `<span class="product-tag">${escapeHtml(tag)}</span>`).join('')}
+          </div>
+        ` : ''}
+
+        <div class="product-actions">
+          <a href="${project.download_link || '#'}" 
+             target="_blank" 
+             class="product-button product-button-primary"
+             onclick="incrementDownloads('${project.id}')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Descargar
+          </a>
+          <a href="proyectos.html" class="product-button product-button-secondary">
+            ← Volver a proyectos
+          </a>
+        </div>
+      `;
+
+      document.getElementById('productContent').innerHTML = content;
+
+      // Agregar event listeners para galería de imágenes
+      if (images.length > 1) {
+        document.querySelectorAll('.product-image-thumb').forEach((thumb, idx) => {
+          thumb.addEventListener('click', () => {
+            const mainImg = document.querySelector('#mainImage img');
+            mainImg.src = images[idx].image_base64;
+            
+            document.querySelectorAll('.product-image-thumb').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+          });
+        });
+      }
+    }
+
+    async function incrementDownloads(projectId) {
+      try {
+        await supabase.rpc('increment_project_downloads', { project_uuid: projectId });
+      } catch (err) {
+        console.error('Error incrementando descargas:', err);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

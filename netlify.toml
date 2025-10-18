@@ -9,6 +9,12 @@
   to = "/home.html"
   status = 200
 
+# Handle product routes with friendly URLs
+[[redirects]]
+  from = "/productos/*"
+  to = "/producto.html"
+  status = 200
+
 # Optional: handle SPA-style routes to home.html too
 [[redirects]]
   from = "/*"

@@ -71,7 +71,7 @@
       transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
       display: flex;
       flex-direction: column;
-      height: 380px; /* altura uniforme para todas las cards */
+      height: 420px; /* altura uniforme para todas las cards */
       width: 320px;  /* ancho uniforme para todas las cards */
       max-width: 100%;
     }
@@ -114,7 +114,12 @@
       color: rgba(255,255,255,0.7);
       margin-bottom: 12px;
       min-height: 40px;
-      overflow: hidden; /* evita que textos largos rompan la altura */
+      max-height: 60px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
     }
     .project-tags {
       display: flex;
@@ -358,7 +363,7 @@
         // Mostrar mensaje de carga
         grid.innerHTML = '<p style="color: rgba(255,255,255,0.6); text-align: center; grid-column: 1/-1; padding: 40px;">Cargando proyectos...</p>';
         
-        // Construir query según la vista actual (sin image_base64 que está en otra DB)
+        // Construir query según la vista actual (con info del usuario)
         let query = supabase
           .from('public_projects')
           .select(`
@@ -366,13 +371,16 @@
             title,
             description,
             author_name,
+            user_id,
             tags,
             views_count,
             downloads_count,
             likes_count,
             download_link,
             project_type,
-            created_at
+            markdown_content,
+            created_at,
+            users (username, verified)
           `);
         
         // Filtrar según la vista
@@ -419,27 +427,41 @@
       
       document.getElementById('projectsEmpty').style.display = 'none';
       
-      // Cargar thumbnails desde la DB de imágenes
+      // Cargar thumbnails y avatares desde la DB de imágenes
       const projectsWithThumbnails = await Promise.all(projects.map(async project => {
-        let thumbnailSrc = 'assets/icons/logo/logo.png'; // Por defecto
+        let thumbnailSrc = 'assets/icons/logo/logo.png';
+        let avatarSrc = 'assets/icons/logo.png';
         
         try {
-          // Obtener thumbnail desde la DB de imágenes separada
-          const { data: images, error } = await supabaseImages
+          // Obtener thumbnail del proyecto
+          const { data: images } = await supabaseImages
             .from('project_images')
             .select('image_base64, is_thumbnail')
             .eq('project_id', project.id)
             .eq('is_thumbnail', true)
             .limit(1);
           
-          if (!error && images && images.length > 0) {
+          if (images && images.length > 0) {
             thumbnailSrc = images[0].image_base64;
           }
+          
+          // Obtener avatar del usuario si existe user_id
+          if (project.user_id) {
+            const { data: avatar } = await supabaseImages
+              .from('user_avatars')
+              .select('avatar_base64')
+              .eq('user_id', project.user_id)
+              .limit(1);
+            
+            if (avatar && avatar.length > 0) {
+              avatarSrc = avatar[0].avatar_base64;
+            }
+          }
         } catch (err) {
-          console.warn('Error cargando thumbnail para proyecto', project.id, err);
+          console.warn('Error cargando imágenes para proyecto', project.id, err);
         }
         
-        return { ...project, thumbnailSrc };
+        return { ...project, thumbnailSrc, avatarSrc };
       }));
       
       grid.innerHTML = projectsWithThumbnails.map(project => {
@@ -465,6 +487,15 @@
               <img src="${project.thumbnailSrc}" alt="${escapeHtml(project.title)}" />
             </div>
             <div class="project-body">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                <img src="${project.avatarSrc}" alt="${escapeHtml(project.author_name)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1);" />
+                <div style="flex: 1; min-width: 0;">
+                  <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(project.author_name)}</span>
+                    ${project.users && project.users.verified ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="#8b00ff" stroke="#fff" stroke-width="2" style="flex-shrink: 0;"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : ''}
+                  </div>
+                </div>
+              </div>
               <h3 class="project-title">${escapeHtml(project.title)}</h3>
               <p class="project-desc">${escapeHtml(project.description || 'Sin descripción')}</p>
               <div class="project-tags">
@@ -521,13 +552,16 @@
       // Incrementar contador de vistas
       await supabase.rpc('increment_project_views', { project_uuid: projectId });
       
-      // Abrir link de descarga en nueva pestaña
-      if (project.download_link) {
-        window.open(project.download_link, '_blank');
-        
-        // Incrementar contador de descargas
-        await supabase.rpc('increment_project_downloads', { project_uuid: projectId });
-      }
+      // Crear URL amigable: productos/nombre-proyecto-by-nombre-autor
+      const projectSlug = project.title.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const authorSlug = project.author_name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      
+      const url = `producto.html?id=${projectId}&slug=${projectSlug}-by-${authorSlug}`;
+      window.location.href = url;
     }
 
     // Búsqueda por texto
