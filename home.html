@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scrakk: Avanzed Editor Code</title>
-        <link rel="icon" type="image/png" href="assets/icons/logo/logo.png">
+        <link rel="icon" type="image/png" href="assets/icons/logo.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
         <div class="nav-container">
             <div class="logo">
                 <a href="home.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
-                    <img src="assets/icons/logo/logo.png" alt="Scrakk Logo">
+                    <img src="assets/icons/logo.png" alt="Scrakk Logo">
                     <div class="typing-container">
                         <span class="typing-text"></span>
                         <span class="cursor"></span>
@@ -31,72 +31,17 @@
         </div>
     </nav>
 
+    <!-- Navbar JavaScript -->
+    <script src="navbar.js"></script>
+
     <script>
-        // Typing Animation
-        const text = "Scrakk Code Editor";
-        const typingText = document.querySelector('.typing-text');
-        const cursor = document.querySelector('.cursor');
-        const logo = document.querySelector('.logo img');
-        let charIndex = 0;
+        // Robot eyes following mouse (específico de home.html)
+        document.addEventListener('DOMContentLoaded', function() {
 
-        function type() {
-            if (charIndex < text.length) {
-                typingText.textContent += text.charAt(charIndex);
-                charIndex++;
-                setTimeout(type, 100);
-            } else {
-                cursor.style.animation = 'cursorFadeOut 0.5s forwards';
-            }
-        }
-
-        // Wait for logo animation to complete before starting typing
-        logo.addEventListener('animationend', () => {
-            setTimeout(type, 300);  // pausa después del rebote final
-        });
-
-        const navLinks = document.getElementById('navLinks');
-        const links = Array.from(navLinks.querySelectorAll('a')).filter(link => !link.closest('.nav-button'));
-        const nav = document.querySelector('nav');
-        let hoverTimeout;
-        
-        links.forEach(link => {
-            link.addEventListener('mouseenter', function(e) {
-                clearTimeout(hoverTimeout);
-                const linkRect = this.getBoundingClientRect();
-                const navRect = navLinks.getBoundingClientRect();
-                const leftPos = linkRect.left - navRect.left;
-                
-                navLinks.style.setProperty('--hover-left', `${leftPos}px`);
-                navLinks.style.setProperty('--hover-width', `${linkRect.width}px`);
-                navLinks.classList.add('has-hover');
-            });
-
-            link.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    if (!links.some(l => l.matches(':hover'))) {
-                        navLinks.classList.remove('has-hover');
-                    }
-                }, 50);
-            });
-        });
-        
-        navLinks.addEventListener('mouseleave', function() {
-            navLinks.classList.remove('has-hover');
-        });
-
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 10) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
-
-
-
-        // Robot eyes following mouse
-        document.addEventListener('mousemove', function(e) {
+          // Robot eyes following mouse
+          document.addEventListener('mousemove', function(e) {
             const eyes = document.querySelector('.eyes');
+            if (!eyes) return;
             const rect = eyes.getBoundingClientRect();
             const eyeCenterX = rect.left + rect.width / 2;
             const eyeCenterY = rect.top + rect.height / 2;
@@ -108,14 +53,13 @@
             const moveY = Math.sin(angle) * distance;
             
             eyes.style.transform = `translate(${moveX}px, ${moveY}px)`;
-        });
+          });
 
-        // Chat simulation animation
-        window.addEventListener('DOMContentLoaded', function() {
-            const messages = document.querySelectorAll('.chat-message');
-            messages.forEach((message, index) => {
-                message.style.animationDelay = `${index * 0.6}s`;
-            });
+          // Chat simulation animation
+          const messages = document.querySelectorAll('.chat-message');
+          messages.forEach((message, index) => {
+            message.style.animationDelay = `${index * 0.6}s`;
+          });
         });
     </script>
 

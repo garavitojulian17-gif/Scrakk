@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "description": "Sitio estático de Scrakk Code Editor",
   "scripts": {
-    "dev": "live-server --open=home.html --port=5173 --no-css-inject --wait=100 --mount=/:."
+    "predev": "node load-env.js",
+    "dev": "live-server --open=home.html --port=5173 --no-css-inject --wait=100 --mount=/:.",
+    "build": "node load-env.js",
+    "config": "node load-env.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"

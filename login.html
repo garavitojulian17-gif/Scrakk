@@ -154,7 +154,7 @@
     <div class="nav-container">
       <div class="logo">
         <a href="home.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
-          <img src="assets/icons/logo/logo.png" alt="Scrakk Logo">
+          <img src="assets/icons/logo.png" alt="Scrakk Logo">
           <div class="typing-container">
             <span class="typing-text"></span>
             <span class="cursor"></span>
@@ -167,10 +167,13 @@
         <a href="home.html#desarrollo">Desarrollo</a>
         <a href="proyectos.html">Proyectos Publicos</a>
         <a href="home.html#compras">Compras</a>
-        <button class="nav-button"><span>Iniciar Sesión</span></button>
+        <a href="login.html" class="nav-button"><span>Iniciar Sesión</span></a>
       </div>
     </div>
   </nav>
+
+  <!-- Navbar JavaScript -->
+  <script src="navbar.js"></script>
 
   <main class="login-page">
     <div class="login-card">
@@ -219,78 +222,13 @@
     </div>
   </main>
 
+  <!-- Configuración de variables de entorno -->
+  <script src="config.js"></script>
+  
   <!-- Configuración de Supabase -->
   <script src="supabase-config.js"></script>
 
   <script>
-    // Animación de escritura en el logo
-    (function(){
-      const text = "Scrakk Code Editor";
-      const typingText = document.querySelector('.typing-text');
-      const cursor = document.querySelector('.cursor');
-      const logo = document.querySelector('.logo img');
-      let charIndex = 0;
-      function type() {
-        if (!typingText) return;
-        if (charIndex < text.length) {
-          typingText.textContent += text.charAt(charIndex);
-          charIndex++;
-          setTimeout(type, 100);
-        } else if (cursor) {
-          cursor.style.animation = 'cursorFadeOut 0.5s forwards';
-        }
-      }
-      if (logo) {
-        logo.addEventListener('animationend', () => setTimeout(type, 300));
-      } else {
-        type();
-      }
-    })();
-
-    // Sombra navbar al hacer scroll
-    (function(){
-      const nav = document.querySelector('nav');
-      window.addEventListener('scroll', function() {
-        if (window.scrollY > 10) nav.classList.add('scrolled');
-        else nav.classList.remove('scrolled');
-      });
-    })();
-
-    // Hover de navbar
-    (function(){
-      const navLinks = document.getElementById('navLinks');
-      if (!navLinks) return;
-      const links = Array.from(navLinks.querySelectorAll('a'));
-      let hoverTimeout;
-
-      function setHoverFor(el){
-        if (!el) return;
-        const linkRect = el.getBoundingClientRect();
-        const navRect = navLinks.getBoundingClientRect();
-        const leftPos = linkRect.left - navRect.left;
-        navLinks.style.setProperty('--hover-left', `${leftPos}px`);
-        navLinks.style.setProperty('--hover-width', `${linkRect.width}px`);
-        navLinks.classList.add('has-hover');
-      }
-
-      links.forEach(link => {
-        link.addEventListener('mouseenter', function(){
-          clearTimeout(hoverTimeout);
-          setHoverFor(this);
-        });
-        link.addEventListener('mouseleave', function(){
-          hoverTimeout = setTimeout(() => {
-            if (!links.some(l => l.matches(':hover'))){
-              navLinks.classList.remove('has-hover');
-            }
-          }, 50);
-        });
-      });
-
-      navLinks.addEventListener('mouseleave', function(){
-        navLinks.classList.remove('has-hover');
-      });
-    })();
 
     // ========================================
     // SISTEMA DE LOGIN
