@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrakk: Avanzed Editor Code</title>
+        <link rel="icon" type="image/png" href="assets/icons/logo/logo.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <a href="home.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
+                    <img src="assets/icons/logo/logo.png" alt="Scrakk Logo">
+                    <div class="typing-container">
+                        <span class="typing-text"></span>
+                        <span class="cursor"></span>
+                    </div>
+                </a>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="#descargar">Descargar</a>
+                <a href="#docs">Docs</a>
+                <a href="#desarrollo">Desarrollo</a>
+                <a href="proyectos.html">Proyectos Publicos</a>
+                <a href="#compras">Compras</a>
+                <a href="login.html" class="nav-button"><span>Iniciar Sesión</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        // Typing Animation
+        const text = "Scrakk Code Editor";
+        const typingText = document.querySelector('.typing-text');
+        const cursor = document.querySelector('.cursor');
+        const logo = document.querySelector('.logo img');
+        let charIndex = 0;
+
+        function type() {
+            if (charIndex < text.length) {
+                typingText.textContent += text.charAt(charIndex);
+                charIndex++;
+                setTimeout(type, 100);
+            } else {
+                cursor.style.animation = 'cursorFadeOut 0.5s forwards';
+            }
+        }
+
+        // Wait for logo animation to complete before starting typing
+        logo.addEventListener('animationend', () => {
+            setTimeout(type, 300);  // pausa después del rebote final
+        });
+
+        const navLinks = document.getElementById('navLinks');
+        const links = Array.from(navLinks.querySelectorAll('a')).filter(link => !link.closest('.nav-button'));
+        const nav = document.querySelector('nav');
+        let hoverTimeout;
+        
+        links.forEach(link => {
+            link.addEventListener('mouseenter', function(e) {
+                clearTimeout(hoverTimeout);
+                const linkRect = this.getBoundingClientRect();
+                const navRect = navLinks.getBoundingClientRect();
+                const leftPos = linkRect.left - navRect.left;
+                
+                navLinks.style.setProperty('--hover-left', `${leftPos}px`);
+                navLinks.style.setProperty('--hover-width', `${linkRect.width}px`);
+                navLinks.classList.add('has-hover');
+            });
+
+            link.addEventListener('mouseleave', function() {
+                hoverTimeout = setTimeout(() => {
+                    if (!links.some(l => l.matches(':hover'))) {
+                        navLinks.classList.remove('has-hover');
+                    }
+                }, 50);
+            });
+        });
+        
+        navLinks.addEventListener('mouseleave', function() {
+            navLinks.classList.remove('has-hover');
+        });
+
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 10) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+
+
+        // Robot eyes following mouse
+        document.addEventListener('mousemove', function(e) {
+            const eyes = document.querySelector('.eyes');
+            const rect = eyes.getBoundingClientRect();
+            const eyeCenterX = rect.left + rect.width / 2;
+            const eyeCenterY = rect.top + rect.height / 2;
+            
+            const angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
+            const distance = Math.min(5, Math.hypot(e.clientX - eyeCenterX, e.clientY - eyeCenterY) / 30);
+            
+            const moveX = Math.cos(angle) * distance;
+            const moveY = Math.sin(angle) * distance;
+            
+            eyes.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        // Chat simulation animation
+        window.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.chat-message');
+            messages.forEach((message, index) => {
+                message.style.animationDelay = `${index * 0.6}s`;
+            });
+        });
+    </script>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Del pensamiento al código en segundos</h1>
+                <div class="hero-description">
+                    <p>La IA que entiende tu visión y la convierte en código limpio y profesional al instante.</p>
+                </div>
+                <div class="hero-buttons">
+                    <button class="primary-button">
+                        <span>Descargar Ahora</span>
+                    </button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <svg class="robot-face" width="200" height="200" viewBox="0 0 200 200">
+                    <rect width="200" height="200" fill="#8b00ff" rx="40"/>
+                    <g class="eyes">
+                        <rect class="eye" x="45" y="65" width="40" height="75" fill="white" rx="10"/>
+                        <rect class="eye" x="115" y="65" width="40" height="75" fill="white" rx="10"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Features Section -->
+    <section class="ai-features-section">
+        <div class="ai-features-container">
+            <div class="features-text">
+                <h2>Potencia tu flujo de trabajo con IA</h2>
+                <div class="feature-item">
+                    <h3>Autocompletado Inteligente con IA</h3>
+                    <p>Experimenta un sistema de autocompletado de última generación que entiende el contexto de tu código, anticipando tus necesidades y sugiriendo soluciones precisas en tiempo real.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Conversaciones Fluidas y Naturales</h3>
+                    <p>Contamos con un sistema de herramientas avanzado que te permite mantener conversaciones profundas con la IA, obteniendo respuestas contextuales y soluciones adaptadas a tu proyecto.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Múltiples Modelos de Gemini</h3>
+                    <p>Accede a varios modelos de Google Gemini según tus necesidades: desde análisis rápido hasta generación de código complejo. Elige la potencia que requiere cada tarea.</p>
+                </div>
+            </div>
+            <div class="chat-panel" style="width: 596px;">
+                <div class="chat-header">
+                    <span class="chat-title">CHAT</span>
+                    <button id="setup-api-key" class="api-key-btn" title="Configurar API Key">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-empty-state" id="chat-empty-state" style="display: none;">
+                        <!-- Hero Section -->
+                        <div class="empty-hero">
+                            <div class="empty-hero-icon">
+                                <div class="icon-glow"></div>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
+                                </svg>
+                            </div>
+                            <h1 class="empty-hero-title">Desarrollo Potenciado con IA</h1>
+                            <p class="empty-hero-subtitle">Transforma tus ideas en realidad con asistencia inteligente de código</p>
+                        </div>
+
+                        <!-- Feature Cards -->
+                        <div class="empty-features-grid">
+                            <div class="feature-card" data-feature="chat">
+                                <div class="feature-card-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                                    </svg>
+                                </div>
+                                <h3>Chat &amp; Código</h3>
+                                <p>Conversaciones naturales</p>
+                            </div>
+
+                            <div class="feature-card" data-feature="code">
+                                <div class="feature-card-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M12 16v-4"></path>
+                                        <path d="M12 8h.01"></path>
+                                    </svg>
+                                </div>
+                                <h3>IA Inteligente</h3>
+                                <p>Genera &amp; optimiza</p>
+                            </div>
+
+                            <div class="feature-card" data-feature="debug">
+                                <div class="feature-card-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                    </svg>
+                                </div>
+                                <h3>Depuración Rápida</h3>
+                                <p>Correcciones con IA</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="empty-quick-actions">
+                            <span class="quick-actions-label">Intenta preguntar:</span>
+                            <div class="quick-action-chips">
+                                <button class="quick-chip" data-prompt="Crea un componente moderno de React con TypeScript y tipos apropiados" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(124, 58, 237, 0.15) 100%); --chip-hover-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>Crear Componente
+                                </button>
+                                <button class="quick-chip" data-prompt="Analiza este código y explica qué hace en términos simples, destacando cualquier parte inteligente o compleja" style="background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(139, 92, 246, 0.15) 100%); --chip-hover-shadow: 0 6px 20px rgba(167, 139, 250, 0.3);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                    </svg>Explicar Código
+                                </button>
+                                <button class="quick-chip" data-prompt="Refactoriza y optimiza este código para mejor rendimiento, legibilidad y mantenibilidad" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.25) 0%, rgba(109, 40, 217, 0.15) 100%); --chip-hover-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                                    </svg>Optimizar Código
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message user">Crea un script.bat que inicie npm run dev, y que desactive procesos de windows.</div>
+                    <div class="message assistant">Por supuesto, he creado el archivo batch que solicitaste. Aquí está el archivo start_dev.bat con la configuración necesaria:</div>
+                    <div class="message assistant">
+                            <div style="background: transparent;">
+                            <div class="monaco-diff-container" style="margin: -24px 0 -85px 0;"><div class="monaco-diff-header" style="display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; min-height: 30px; cursor: pointer;"><div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-primary); font-weight: 500; flex: 1 1 0%;">
+                    <img src="assets/icons/bat.png" alt="BAT" style="width: 12px; height: 12px;">
+                    <span>start_dev.bat</span>
+                    <div class="diff-line-stats" style="display: flex; gap: 6px; margin-left: 8px; align-items: center;">
+                        <span class="diff-line-additions" style="font-size: 11px; font-weight: 600; color: #2ea043;">+6</span>
+                        <span class="diff-line-deletions" style="font-size: 11px; font-weight: 600; color: #f85149;">-0</span>
+                    </div>
+                    <div class="diff-loading-spinner" style="display: none; width: 12px; height: 12px; border-top-style: solid; border-top-width: 2px; border-right-color: transparent; border-right-style: solid; border-right-width: 2px; border-bottom-color: transparent; border-bottom-style: solid; border-bottom-width: 2px; border-left-color: transparent; border-left-style: solid; border-left-width: 2px; border-image-source: none; border-image-slice: 1; border-image-width: 1; border-image-outset: 0; border-image-repeat: stretch; border-top-color: var(--accent-color); border-radius: 50%; animation: 0.8s linear 0s infinite normal none running spin;"></div>
+                </div></div></div>
+                            </div>
+                    </div>
+                    <div class="message assistant">¿En qué más te puedo ayudar? Si necesitas ajustar algo del script o tienes otra consulta, no dudes en preguntarme.</div>
+                </div>
+                <div class="typing-indicator-overlay" style="display: none;">
+                    <div class="typing-indicator-content">
+                    <img src="../assets/icons/logo.png" alt="Scrakk" class="typing-indicator-logo">
+                    <span class="typing-indicator-text">Scrakk está escribiendo</span>
+                    <div class="typing-indicator-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                      <div class="chat-input-main">
+                        <textarea id="chat-input" placeholder="Haz una pregunta o describe una tarea..." rows="1" style="border-radius: 0px !important; border: none !important; background: transparent !important;"></textarea>
+                        <button id="send-message" class="send-button">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 19V5M5 12l7-7 7 7"></path>
+                          </svg>
+                        </button>
+                      </div>
+                      <div class="chat-input-toolbar">
+                        <div class="toolbar-left">
+                          <div class="mode-selector-wrapper">
+                            <button class="toolbar-btn mode-selector" id="mode-selector-toolbar" data-tooltip="Select Mode">
+                              <span class="mode-name">Agent</span>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6,9 12,15 18,9"></polyline>
+                              </svg>
+                            </button>
+                            <div class="mode-dropdown-toolbar" id="mode-dropdown-toolbar">
+                              <div class="mode-option-toolbar" data-mode="ask">
+                                <div class="option-content">
+                                  <span>Ask</span>
+                                </div>
+                                <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                  <polyline points="3,8 6,11 13,4"></polyline>
+                                </svg>
+                              </div>
+                              <div class="mode-option-toolbar selected" data-mode="agent">
+                                <div class="option-content">
+                                  <span>Agent</span>
+                                </div>
+                                <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                  <polyline points="3,8 6,11 13,4"></polyline>
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="model-selector-wrapper">
+                            <button class="toolbar-btn model-selector" id="model-selector-toolbar" data-tooltip="Select Model" onclick="console.log('DIRECT ONCLICK FIRED'); document.getElementById('model-dropdown-toolbar').classList.toggle('show'); console.log('Dropdown classes:', document.getElementById('model-dropdown-toolbar').className);">
+                              <span class="model-name">Gemini 2.0 Flash</span>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6,9 12,15 18,9"></polyline>
+                              </svg>
+                            </button>
+                            <div class="model-dropdown-toolbar" id="model-dropdown-toolbar" style="left: 1088.65px; bottom: 76px;">
+                              <div class="model-option-toolbar" data-model="auto">
+                                <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                  <polyline points="3,8 6,11 13,4"></polyline>
+                                </svg>
+                                <div class="option-content">
+                                  <span>Auto</span>
+                                  <span class="model-badge-toolbar">Smart</span>
+                                </div>
+                              </div>
+                              <div style="height: 1px; background: #3c3c3c; margin: 2px 0;"></div>
+                              <div class="model-option-toolbar selected" data-model="gemini-2.0-flash">
+                                <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                  <polyline points="3,8 6,11 13,4"></polyline>
+                                </svg>
+                                <div class="option-content">
+                                  <span>Gemini 2.0 Flash</span>
+                                  <span class="model-badge-toolbar">Default</span>
+                                </div>
+                              </div>
+                              <div class="model-option-toolbar" data-model="gemini-2.5-flash">
+                                <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                  <polyline points="3,8 6,11 13,4"></polyline>
+                                </svg>
+                                <div class="option-content">
+                                  <span>Gemini 2.5 Flash</span>
+                                  <span class="model-badge-toolbar">Fast</span>
+                                </div>
+                              </div>
+                              <div class="model-option-toolbar" data-model="gemini-2.5-pro">
+                                <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                  <polyline points="3,8 6,11 13,4"></polyline>
+                                </svg>
+                                <div class="option-content">
+                                  <span>Gemini 2.5 Pro</span>
+                                  <span class="model-badge-toolbar">Pro</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="toolbar-right"></div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Section -->
+    <section class="content">
+        <div class="card">
+            <h3>Rápido y Eficiente</h3>
+            <p>Rendimiento optimizado con resaltado de sintaxis instantáneo y autocompletado inteligente.</p>
+        </div>
+        <div class="card">
+            <h3>Seguro por Defecto</h3>
+            <p>Protección de nivel empresarial incluida en cada proyecto sin configuración adicional.</p>
+        </div>
+        <div class="card">
+            <h3>Fácil de Usar</h3>
+            <p>Interfaz intuitiva y documentación completa para que comiences en minutos.</p>
+        </div>
+    </section>
+</body>
+</html>

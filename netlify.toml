@@ -1,0 +1,15 @@
+# Netlify config for static site using home.html as root
+[build]
+  publish = "."
+
+# Redirect root to home.html so / loads correctly
+[[redirects]]
+  from = "/"
+  to = "/home.html"
+  status = 200
+
+# Optional: handle SPA-style routes to home.html too
+[[redirects]]
+  from = "/*"
+  to = "/home.html"
+  status = 200

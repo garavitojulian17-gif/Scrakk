@@ -1,0 +1,15 @@
+{
+  "name": "scrakk-editor-code-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Sitio estático de Scrakk Code Editor",
+  "scripts": {
+    "dev": "live-server --open=home.html --port=5173 --no-css-inject --wait=100 --mount=/:."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
