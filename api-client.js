@@ -75,24 +75,36 @@ window.API = {
         
         // Buscar usuario por author_name (scrakk_id)
         if (project.author_name) {
-          const { data: userData } = await supabase
+          const { data: userData, error: userError } = await supabase
             .from('users')
             .select('id, verified, username')
             .eq('scrakk_id', project.author_name)
             .single();
           
+          if (userError) {
+            console.log(`[API] Usuario no encontrado para scrakk_id: ${project.author_name}`, userError);
+          }
+          
           if (userData) {
             verified = userData.verified || false;
+            console.log(`[API] Usuario encontrado: ${userData.username}, verificado: ${verified}`);
             
             // Buscar avatar usando el user_id obtenido
-            const { data: avatarData } = await supabaseImages
+            const { data: avatarData, error: avatarError } = await supabaseImages
               .from('user_avatars')
               .select('avatar_base64')
               .eq('user_id', userData.id)
               .limit(1);
             
+            if (avatarError) {
+              console.log(`[API] Error buscando avatar para user_id: ${userData.id}`, avatarError);
+            }
+            
             if (avatarData && avatarData.length > 0) {
               avatar = avatarData[0].avatar_base64;
+              console.log(`[API] Avatar encontrado para ${userData.username}`);
+            } else {
+              console.log(`[API] No se encontró avatar para user_id: ${userData.id}`);
             }
           }
         }

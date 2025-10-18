@@ -236,7 +236,31 @@
         <a href="home.html#desarrollo">Desarrollo</a>
         <a href="proyectos.html">Proyectos Publicos</a>
         <a href="home.html#compras">Compras</a>
-        <a href="login.html" class="nav-button"><span>Iniciar Sesión</span></a>
+        <a href="login.html" class="nav-button" id="loginBtn"><span>Iniciar Sesión</span></a>
+        <div class="user-menu" id="userMenu" style="display: none;">
+          <button class="user-button" id="userButton">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span id="userName">Usuario</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="dashboard.html" class="user-dropdown-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              Dashboard
+            </a>
+            <div class="user-dropdown-divider"></div>
+            <a href="proyectos.html" class="user-dropdown-item">Ver Proyectos Públicos</a>
+            <div class="user-dropdown-divider"></div>
+            <div class="user-dropdown-item" id="logoutBtn">Cerrar Sesión</div>
+          </div>
+        </div>
       </div>
     </div>
   </nav>

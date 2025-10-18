@@ -119,6 +119,7 @@
       text-overflow: ellipsis;
       display: -webkit-box;
       -webkit-line-clamp: 3;
+      line-clamp: 3;
       -webkit-box-orient: vertical;
     }
     .project-tags {
@@ -185,6 +186,9 @@
       border-radius: 6px;
       transition: all 0.2s;
       font-size: 14px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
     }
     .user-dropdown-item:hover {
       background: rgba(139,0,255,0.15);
@@ -233,6 +237,16 @@
             <span id="userName">Usuario</span>
           </button>
           <div class="user-dropdown" id="userDropdown">
+            <a href="dashboard.html" class="user-dropdown-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              Dashboard
+            </a>
+            <div class="user-dropdown-divider"></div>
             <div class="user-dropdown-item" id="myProjectsTab">Mis Proyectos</div>
             <div class="user-dropdown-item" id="allProjectsTab">Todos los Proyectos</div>
             <div class="user-dropdown-divider"></div>

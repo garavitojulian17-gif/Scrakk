@@ -129,6 +129,61 @@
   }
 
   // ========================================
+  // SISTEMA DE AUTENTICACIÓN DEL NAVBAR
+  // ========================================
+  function initUserSession() {
+    const loginBtn = document.getElementById('loginBtn');
+    const userMenu = document.getElementById('userMenu');
+    const userButton = document.getElementById('userButton');
+    const userDropdown = document.getElementById('userDropdown');
+    const userName = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // Cargar sesión desde localStorage
+    const userData = localStorage.getItem('scrakk_user');
+    
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        
+        // Mostrar menú de usuario
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (userMenu) userMenu.style.display = 'block';
+        if (userName) userName.textContent = user.username || user.display_name || 'Usuario';
+        
+        // Toggle dropdown
+        if (userButton && userDropdown) {
+          userButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('active');
+          });
+          
+          // Cerrar dropdown al clicar fuera
+          document.addEventListener('click', () => {
+            userDropdown.classList.remove('active');
+          });
+        }
+        
+        // Logout
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('scrakk_user');
+            window.location.href = 'home.html';
+          });
+        }
+        
+      } catch (err) {
+        console.error('Error cargando sesión:', err);
+        localStorage.removeItem('scrakk_user');
+      }
+    } else {
+      // Mostrar botón de login
+      if (loginBtn) loginBtn.style.display = 'block';
+      if (userMenu) userMenu.style.display = 'none';
+    }
+  }
+
+  // ========================================
   // INICIALIZACIÓN
   // ========================================
   function init() {
@@ -138,11 +193,13 @@
         initTypingAnimation();
         initScrollEffect();
         initHoverEffect();
+        initUserSession();
       });
     } else {
       initTypingAnimation();
       initScrollEffect();
       initHoverEffect();
+      initUserSession();
     }
   }
 
