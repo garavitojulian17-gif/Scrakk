@@ -35,27 +35,8 @@
     <script src="navbar.js"></script>
 
     <script>
-        // Robot eyes following mouse (específico de home.html)
+        // Chat simulation animation
         document.addEventListener('DOMContentLoaded', function() {
-
-          // Robot eyes following mouse
-          document.addEventListener('mousemove', function(e) {
-            const eyes = document.querySelector('.eyes');
-            if (!eyes) return;
-            const rect = eyes.getBoundingClientRect();
-            const eyeCenterX = rect.left + rect.width / 2;
-            const eyeCenterY = rect.top + rect.height / 2;
-            
-            const angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
-            const distance = Math.min(5, Math.hypot(e.clientX - eyeCenterX, e.clientY - eyeCenterY) / 30);
-            
-            const moveX = Math.cos(angle) * distance;
-            const moveY = Math.sin(angle) * distance;
-            
-            eyes.style.transform = `translate(${moveX}px, ${moveY}px)`;
-          });
-
-          // Chat simulation animation
           const messages = document.querySelectorAll('.chat-message');
           messages.forEach((message, index) => {
             message.style.animationDelay = `${index * 0.6}s`;
@@ -67,7 +48,7 @@
     <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
-                <h1>Del pensamiento al código en segundos</h1>
+                <h1>Editor de código potente y sumamente cómodo</h1>
                 <div class="hero-description">
                     <p>La IA que entiende tu visión y la convierte en código limpio y profesional al instante.</p>
                 </div>
@@ -76,15 +57,6 @@
                         <span>Descargar Ahora</span>
                     </button>
                 </div>
-            </div>
-            <div class="hero-image">
-                <svg class="robot-face" width="200" height="200" viewBox="0 0 200 200">
-                    <rect width="200" height="200" fill="#8b00ff" rx="40"/>
-                    <g class="eyes">
-                        <rect class="eye" x="45" y="65" width="40" height="75" fill="white" rx="10"/>
-                        <rect class="eye" x="115" y="65" width="40" height="75" fill="white" rx="10"/>
-                    </g>
-                </svg>
             </div>
         </div>
     </section>
