@@ -52,30 +52,30 @@ exports.handler = async (event, context) => {
       .eq('project_id', id)
       .order('image_order', { ascending: true });
 
-    // Obtener avatar del autor Y verificación
+    // Obtener avatar del autor Y verificación usando author_name (scrakk_id)
     let avatar = null;
     let verified = false;
     
-    if (project.user_id) {
-      const { data: avatarData } = await supabaseImages
-        .from('user_avatars')
-        .select('avatar_base64')
-        .eq('user_id', project.user_id)
-        .limit(1);
-
-      if (avatarData && avatarData.length > 0) {
-        avatar = avatarData[0].avatar_base64;
-      }
-      
-      // Obtener verificación
+    if (project.author_name) {
       const { data: userData } = await supabase
         .from('users')
-        .select('verified')
-        .eq('id', project.user_id)
+        .select('id, verified, username')
+        .eq('scrakk_id', project.author_name)
         .single();
       
       if (userData) {
         verified = userData.verified || false;
+        
+        // Buscar avatar usando el user_id obtenido
+        const { data: avatarData } = await supabaseImages
+          .from('user_avatars')
+          .select('avatar_base64')
+          .eq('user_id', userData.id)
+          .limit(1);
+
+        if (avatarData && avatarData.length > 0) {
+          avatar = avatarData[0].avatar_base64;
+        }
       }
     }
 

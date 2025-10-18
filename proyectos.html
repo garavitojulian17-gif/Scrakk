@@ -367,8 +367,8 @@
         // Mostrar mensaje de carga
         grid.innerHTML = '<p style="color: rgba(255,255,255,0.6); text-align: center; grid-column: 1/-1; padding: 40px;">Cargando proyectos...</p>';
         
-        // Usar API client unificado
-        allProjects = await window.API.getProjects(currentView, currentUser?.id);
+        // Usar API client unificado (pasando scrakk_id)
+        allProjects = await window.API.getProjects(currentView, currentUser?.scrakk_id);
         
         if (allProjects.length === 0) {
           grid.innerHTML = '';
@@ -423,10 +423,14 @@
             </div>
             <div class="project-body">
               <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                <img src="${avatarSrc}" alt="${escapeHtml(project.author_name)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1);" />
+                <img src="${avatarSrc}" alt="${escapeHtml(project.author_name)}" 
+                     style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); cursor: pointer;"
+                     onclick="event.stopPropagation(); goToDashboard('${escapeHtml(project.author_name)}')" 
+                     title="Ver perfil de ${escapeHtml(project.author_name)}" />
                 <div style="flex: 1; min-width: 0;">
                   <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(project.author_name)}</span>
+                    <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;"
+                          onclick="event.stopPropagation(); goToDashboard('${escapeHtml(project.author_name)}')">${escapeHtml(project.author_name)}</span>
                     ${project.verified ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="#1DA1F2" stroke="#fff" stroke-width="2" style="flex-shrink: 0;"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : ''}
                   </div>
                 </div>
@@ -494,6 +498,16 @@
       
       const url = `producto.html?id=${projectId}&slug=${projectSlug}-by-${authorSlug}`;
       window.location.href = url;
+    }
+    
+    function goToDashboard(scrakkId) {
+      // Si es mi usuario, ir a mi dashboard
+      if (currentUser && currentUser.scrakk_id === scrakkId) {
+        window.location.href = 'dashboard.html';
+      } else {
+        // TODO: Página de perfil público del usuario
+        alert(`Perfil de ${scrakkId} - Próximamente`);
+      }
     }
 
     // Búsqueda por texto

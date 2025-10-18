@@ -41,7 +41,7 @@ if (isDev) {
 
 // API unificada
 window.API = {
-  async getProjects(view, userId) {
+  async getProjects(view, scrakkId) {
     if (isDev) {
       // Desarrollo: consulta directa
       let query = supabase
@@ -52,8 +52,8 @@ window.API = {
           download_link, project_type, markdown_content, created_at
         `);
       
-      if (view === 'my' && userId) {
-        query = query.eq('user_id', userId);
+      if (view === 'my' && scrakkId) {
+        query = query.eq('author_name', scrakkId);
       } else {
         query = query.eq('is_public', true);
       }
@@ -73,28 +73,27 @@ window.API = {
         let avatar = null;
         let verified = false;
         
-        // Si hay user_id, obtener avatar Y verificación
-        if (project.user_id) {
-          // Avatar desde DB de imágenes
-          const { data: avatarData } = await supabaseImages
-            .from('user_avatars')
-            .select('avatar_base64')
-            .eq('user_id', project.user_id)
-            .limit(1);
-          
-          if (avatarData && avatarData.length > 0) {
-            avatar = avatarData[0].avatar_base64;
-          }
-          
-          // Verificación desde DB principal
+        // Buscar usuario por author_name (scrakk_id)
+        if (project.author_name) {
           const { data: userData } = await supabase
             .from('users')
-            .select('verified')
-            .eq('id', project.user_id)
+            .select('id, verified, username')
+            .eq('scrakk_id', project.author_name)
             .single();
           
           if (userData) {
             verified = userData.verified || false;
+            
+            // Buscar avatar usando el user_id obtenido
+            const { data: avatarData } = await supabaseImages
+              .from('user_avatars')
+              .select('avatar_base64')
+              .eq('user_id', userData.id)
+              .limit(1);
+            
+            if (avatarData && avatarData.length > 0) {
+              avatar = avatarData[0].avatar_base64;
+            }
           }
         }
         
@@ -112,7 +111,7 @@ window.API = {
       const response = await fetch('/.netlify/functions/get-projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ view, userId })
+        body: JSON.stringify({ view, scrakkId })
       });
       
       const { projects } = await response.json();
@@ -141,27 +140,27 @@ window.API = {
       let avatar = null;
       let verified = false;
       
-      if (project.user_id) {
-        // Avatar
-        const { data: avatarData } = await supabaseImages
-          .from('user_avatars')
-          .select('avatar_base64')
-          .eq('user_id', project.user_id)
-          .limit(1);
-        
-        if (avatarData && avatarData.length > 0) {
-          avatar = avatarData[0].avatar_base64;
-        }
-        
-        // Verificación
+      // Buscar usuario por author_name (scrakk_id)
+      if (project.author_name) {
         const { data: userData } = await supabase
           .from('users')
-          .select('verified')
-          .eq('id', project.user_id)
+          .select('id, verified, username')
+          .eq('scrakk_id', project.author_name)
           .single();
         
         if (userData) {
           verified = userData.verified || false;
+          
+          // Buscar avatar usando el user_id obtenido
+          const { data: avatarData } = await supabaseImages
+            .from('user_avatars')
+            .select('avatar_base64')
+            .eq('user_id', userData.id)
+            .limit(1);
+          
+          if (avatarData && avatarData.length > 0) {
+            avatar = avatarData[0].avatar_base64;
+          }
         }
       }
       

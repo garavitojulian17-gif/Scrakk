@@ -13,7 +13,7 @@ exports.handler = async (event, context) => {
   );
 
   try {
-    const { view, userId } = JSON.parse(event.body || '{}');
+    const { view, scrakkId } = JSON.parse(event.body || '{}');
 
     // Construir query
     let query = supabase
@@ -31,13 +31,11 @@ exports.handler = async (event, context) => {
         download_link,
         project_type,
         markdown_content,
-        created_at,
-        users (username, verified)
+        created_at
       `);
 
-    // Filtrar según vista
-    if (view === 'my' && userId) {
-      query = query.eq('user_id', userId);
+    if (view === 'my' && scrakkId) {
+      query = query.eq('author_name', scrakkId);
     } else {
       query = query.eq('is_public', true);
     }
@@ -64,27 +62,27 @@ exports.handler = async (event, context) => {
         thumbnail = thumbs[0].image_base64;
       }
 
-      // Obtener avatar del autor Y verificación
-      if (project.user_id) {
-        const { data: avatarData } = await supabaseImages
-          .from('user_avatars')
-          .select('avatar_base64')
-          .eq('user_id', project.user_id)
-          .limit(1);
-
-        if (avatarData && avatarData.length > 0) {
-          avatar = avatarData[0].avatar_base64;
-        }
-        
-        // Obtener verificación
+      // Obtener avatar del autor Y verificación usando author_name (scrakk_id)
+      if (project.author_name) {
         const { data: userData } = await supabase
           .from('users')
-          .select('verified')
-          .eq('id', project.user_id)
+          .select('id, verified, username')
+          .eq('scrakk_id', project.author_name)
           .single();
         
         if (userData) {
           verified = userData.verified || false;
+          
+          // Buscar avatar usando el user_id obtenido
+          const { data: avatarData } = await supabaseImages
+            .from('user_avatars')
+            .select('avatar_base64')
+            .eq('user_id', userData.id)
+            .limit(1);
+
+          if (avatarData && avatarData.length > 0) {
+            avatar = avatarData[0].avatar_base64;
+          }
         }
       }
 

@@ -307,7 +307,7 @@
         <div class="product-header">
           <h1>${escapeHtml(project.title)}</h1>
           
-          <div class="product-author">
+          <div class="product-author" style="cursor: pointer;" onclick="goToDashboard('${escapeHtml(project.author_name)}')">
             <img src="${avatarSrc}" alt="${escapeHtml(project.author_name)}" />
             <div class="product-author-info">
               <div class="product-author-name">
@@ -428,6 +428,20 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+    
+    function goToDashboard(scrakkId) {
+      // Verificar si hay usuario logeado
+      const userData = localStorage.getItem('scrakk_user');
+      if (userData) {
+        const currentUser = JSON.parse(userData);
+        if (currentUser.scrakk_id === scrakkId) {
+          window.location.href = 'dashboard.html';
+          return;
+        }
+      }
+      // TODO: Página de perfil público del usuario
+      alert(`Perfil de ${scrakkId} - Próximamente`);
     }
   </script>
 </body>
