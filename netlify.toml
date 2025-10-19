@@ -1,14 +1,5 @@
-# Netlify config for static site using home.html as root
-[build]
-  publish = "."
-  command = "npm install"
-  functions = "netlify/functions"
-
-# Redirect root to home.html so / loads correctly
-[[redirects]]
-  from = "/"
-  to = "/home.html"
-  status = 200
+# GitHub Pages - Archivo no usado
+# Este proyecto ahora usa GitHub Pages
 
 # Handle product routes with friendly URLs
 [[redirects]]

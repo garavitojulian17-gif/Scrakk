@@ -285,13 +285,9 @@
 
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Config local (solo desarrollo) -->
-  <script>
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      document.write('<script src="config-local.js"><\/script>');
-    }
-  </script>
-  <!-- API Client unificado -->
+  <!-- Config -->
+  <script src="config-local.js"></script>
+  <!-- API Client -->
   <script src="api-client.js"></script>
   
   <script>

@@ -3,7 +3,6 @@
 // =========================================
 
 let currentUser = null;
-// isDev ya está definido globalmente en api-client.js
 
 // Cargar usuario
 function loadCurrentUser() {
@@ -49,8 +48,7 @@ async function loadProfile() {
     // Obtener avatar
     let avatarSrc = 'assets/icons/logo.png';
     
-    if (window.isDev) {
-      const supabaseImages = window.supabase.createClient(
+    const supabaseImages = window.supabase.createClient(
         window.ENV_CONFIG.SUPABASE_IMAGES_URL,
         window.ENV_CONFIG.SUPABASE_IMAGES_ANON_KEY
       );
@@ -64,8 +62,8 @@ async function loadProfile() {
       if (avatarData && avatarData.length > 0) {
         avatarSrc = avatarData[0].avatar_base64;
       }
-    }
     
+    document.getElementById('userAvatar').src = avatarSrc;
     // Calcular tiempo desde creación
     const createdDate = new Date(currentUser.created_at);
     const now = new Date();
@@ -127,11 +125,6 @@ async function loadMyProjects() {
 // Cargar mis extensiones
 async function loadMyExtensions() {
   try {
-    if (!window.isDev) {
-      document.getElementById('myExtensions').innerHTML = '<p style="color: rgba(255,255,255,0.6);">Extensiones no disponibles en esta versión.</p>';
-      return;
-    }
-    
     const supabase = window.supabase.createClient(
       window.ENV_CONFIG.SUPABASE_URL,
       window.ENV_CONFIG.SUPABASE_ANON_KEY
@@ -308,11 +301,6 @@ async function uploadAvatar(event) {
     const base64 = e.target.result;
     
     try {
-      if (!window.isDev) {
-        alert('Función no disponible en producción aún');
-        return;
-      }
-      
       const supabaseImages = window.supabase.createClient(
         window.ENV_CONFIG.SUPABASE_IMAGES_URL,
         window.ENV_CONFIG.SUPABASE_IMAGES_ANON_KEY
@@ -345,11 +333,6 @@ async function updateUsername(event) {
   }
   
   try {
-    if (!window.isDev) {
-      alert('Función no disponible en producción aún');
-      return;
-    }
-    
     const supabase = window.supabase.createClient(
       window.ENV_CONFIG.SUPABASE_URL,
       window.ENV_CONFIG.SUPABASE_ANON_KEY
