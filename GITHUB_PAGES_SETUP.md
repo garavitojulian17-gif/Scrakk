@@ -2,18 +2,41 @@
 
 ## Arquitectura
 
-**GitHub Pages = Hosting estático**
+**GitHub Pages = Hosting estático (solo HTML, CSS, JS)**
 
 ```
 Cliente (navegador)  →  Supabase (directo)
-                        ↑ API keys visibles en código
+                        ↑ API keys públicas (anon keys)
 ```
 
 ⚠️ **IMPORTANTE**: Como GitHub Pages solo soporta sitios estáticos (sin backend), las API keys de Supabase estarán en el código del cliente. Asegúrate de usar **Row Level Security (RLS)** en Supabase para proteger tus datos.
 
+## ✨ Este proyecto es 100% estático
+
+- ❌ No usa Node.js
+- ❌ No usa npm
+- ❌ No tiene build process
+- ✅ Solo archivos HTML, CSS y JavaScript
+- ✅ Carga directamente en el navegador
+
 ## 📋 Pasos para desplegar
 
-### 1. Preparar el repositorio
+### 1. Configurar las API keys
+
+Renombra `config-local.js.example` a `config-local.js` y agrega tus keys:
+
+```javascript
+window.ENV_CONFIG = {
+  SUPABASE_URL: 'https://tu-proyecto.supabase.co',
+  SUPABASE_ANON_KEY: 'tu-anon-key-publica',
+  SUPABASE_IMAGES_URL: 'https://tu-proyecto-imagenes.supabase.co',
+  SUPABASE_IMAGES_ANON_KEY: 'tu-anon-key-imagenes-publica'
+};
+```
+
+⚠️ **IMPORTANTE**: `config-local.js` está en `.gitignore`. Para producción, crea `config.js` con las mismas keys.
+
+### 2. Preparar el repositorio
 
 ```bash
 git init
@@ -32,30 +55,7 @@ git push -u origin main
 4. En **Folder**, selecciona `/ (root)`
 5. Click en **Save**
 
-### 3. Archivo de configuración
-
-Renombra `config-local.js` a `config.js` y asegúrate de que contenga:
-
-```javascript
-window.ENV_CONFIG = {
-  SUPABASE_URL: 'https://tu-proyecto.supabase.co',
-  SUPABASE_ANON_KEY: 'tu-anon-key',
-  SUPABASE_IMAGES_URL: 'https://tu-proyecto-imagenes.supabase.co',
-  SUPABASE_IMAGES_ANON_KEY: 'tu-anon-key-imagenes'
-};
-```
-
-**⚠️ NO USES SERVICE KEYS**, solo las `anon` keys públicas.
-
-### 4. Actualizar referencias en HTML
-
-Cambia todas las referencias de `config-local.js` a `config.js`:
-
-```html
-<script src="config.js"></script>
-```
-
-### 5. Configurar página de inicio
+### 3. Configurar página de inicio (opcional)
 
 Crea un archivo `index.html` que redirija a `home.html`:
 
