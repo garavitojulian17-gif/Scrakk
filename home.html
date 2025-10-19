@@ -6,6 +6,70 @@
     <title>Scrakk: Avanzed Editor Code</title>
         <link rel="icon" type="image/png" href="assets/icons/logo.png">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilos del menú de usuario */
+        .user-menu {
+            position: relative;
+            display: none;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(139,0,255,0.15);
+            border: 1px solid rgba(139,0,255,0.3);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .user-button:hover {
+            background: rgba(139,0,255,0.25);
+            border-color: rgba(139,0,255,0.5);
+        }
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: rgba(20,20,20,0.98);
+            border: 1px solid rgba(139,0,255,0.3);
+            border-radius: 8px;
+            padding: 8px;
+            min-width: 220px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .user-dropdown.active {
+            display: block;
+        }
+        .user-dropdown-item {
+            padding: 12px 14px;
+            color: rgba(255,255,255,0.85);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .user-dropdown-item:hover {
+            background: rgba(139,0,255,0.2);
+            color: #fff;
+        }
+        .user-dropdown-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 8px 0;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->

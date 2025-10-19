@@ -2,9 +2,11 @@
 # SCRAKK CODE EDITOR WEB - GITIGNORE
 # =========================================
 
-# Configuración privada (no subir a GitHub)
+# Configuración local de desarrollo (no subir a GitHub)
 config-local.js
 .env
+
+# NOTA: config.js SÍ debe subirse a GitHub (contiene solo anon keys públicas)
 
 # Editor
 .vscode/
